@@ -1,8 +1,6 @@
+Corporate Expense Manager
+
 This is an app that help corporate to manage their employee expenses. The backend are on blockchain so it is transparent.
-
-Employee Expense Manager
-2023/02/01 -by Lanli
-
 
 The problem:
 Managing employee expenses is troublesome and often can cost much, especially for small companies, who need to hire a dedicated accountant to manage that.
