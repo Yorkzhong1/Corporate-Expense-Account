@@ -11,33 +11,15 @@ The solution:
 Using blockchain technology, companies can manage their employee expenses automatically. It also adds transparency as all the transactions can be found in blockchain, this will simplify management as well as auditing, thus overall it reduces company cost.
 
 The design:
+The company account contract is a wallet contract with below functions:
 
-1/ core function:
-The company account contract is a multi-sig wallet with below functions:
-Manager can deploy a contract for the company.
-For managers, functions include:
-Add and delete employee(name and wallet address), employee can have different types (for example, sales, customer service)
-Set and change employee budget for each month
+three basic roles: owner, manager, employee;
+
+ - Owner can deploy a contract for the company, and add roles, whitelist merchants and managers,set monthly spending budget for different role;
+ - Managers can add their employee, change employees, and approve employee submitted transaction which is over their monthly budget;
+ - employee can submit transactions, if the amount is less than their monthly budget, they can proceed directly. If it is over, then the transactions needs to be approved by manager.
 
 
-For spending over the monthly budget, can have approval process
-Can add or change approvers and approval rules(for example, 2 out of 4 can approve)
-For employee, functions include:
-Spend money within their monthly budget
-If need to spend money above their monthly budget, can submit transaction and get approved
-	2/ the contract is upgradable to implement new functions in the future
-
-	3/ additional function:
-Employee: historical of their spending, and budget left for the month
-Manager:
-Overall company historical spending and  balance let
-Employee’s historical spending
-Withdraw fund: can specify amount to be withdraw. 
-
-	4/ Future function (not included in this version):
-Add whitelisted merchants that can spend money(future function, not included in the demo)
-Can spend all ERC 20 token
-Manager can use existing fund to save in lending protocol to generate interest
 
 
 
