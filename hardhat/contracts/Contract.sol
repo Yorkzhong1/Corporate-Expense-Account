@@ -132,6 +132,28 @@ contract CorporateAccount {
         return roleProfile[roleId].roleName;
     }
 
+// functions to manage merchants
+    function isMerchant(address _employee) internal view returns(bool){
+        for(uint i=0;i<Merchants.length;i++){
+            if(Merchants[i]==_employee){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+
+    function addMerchant(string memory  _name, address _merchant) external onlyOwner{
+        require(!isMerchant(_merchant),"Merchant already exist");
+        uint merchantId=Merchants.length;
+        Merchants.push(_merchant);
+        MerchantProfile[_merchant]=Merchant(merchantId,_name,true);
+    }
+
+    function activeMerchant(address _merchant) external onlyOwner{
+        MerchantProfile[_merchant].active=!MerchantProfile[_merchant].active; //if originally active, this deactive. vise-verse.
+    }
+
 
 //functions to manage employee
     function isEmployee(address _employee) internal view returns(bool){
@@ -187,27 +209,7 @@ contract CorporateAccount {
         EmployeeProfile[_employee].myManager=_manager;
     }
 
-// functions to manage merchants
-    function isMerchant(address _employee) internal view returns(bool){
-        for(uint i=0;i<Merchants.length;i++){
-            if(Merchants[i]==_employee){
-                return true;
-            }
-        }
-        return false;
-    }
-    
 
-    function addMerchant(string memory  _name, address _merchant) external onlyManager{
-        require(!isMerchant(_merchant),"Merchant already exist");
-        uint merchantId=Merchants.length;
-        Merchants.push(_merchant);
-        MerchantProfile[_merchant]=Merchant(merchantId,_name,true);
-    }
-
-    function activeMerchant(address _merchant) external onlyManager{
-        MerchantProfile[_merchant].active=!MerchantProfile[_merchant].active; //if originally active, this deactive. vise-verse.
-    }
 
 //functions to manage transaction, only employee can operate
     function updateSpent(address _employee) internal {
