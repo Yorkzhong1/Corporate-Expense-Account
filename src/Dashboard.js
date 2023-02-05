@@ -9,6 +9,7 @@ import {
     Mapping_CONTRACT_ADDRESS,
     CONTRACT_ABI,
     CONTRACT_code,
+    Account_CONTRACT_ADDRESS,
 
   } from "./Contants/Constants";
 
@@ -17,12 +18,24 @@ import {
 export function Dashboard(prop){
     const web3ModalRef = useRef();  
     const [managers,setManagers]=useState([]); 
+    const [roles,setRoles]=useState([]); 
     const [employees,setEmployees]=useState([]); 
     const [merchants,setMerchants]=useState([]); 
     const [contracts,setContracts]=useState([]); 
+
+//employee related states
+    const [myBudget,setMyBudget]=useState(); 
+    const [mySpent,setMySpent]=useState(); 
+    
+
     const [myContract,setMyContracts]=useState(""); 
     const [myRole,setMyRole]=useState('na');  
     const [walletConnected, setWalletConnected] = useState(false);
+
+
+
+
+
 //basic functions
     const getProviderOrSigner = async (needSigner = false) => {
         const provider = await web3ModalRef.current.connect();
@@ -67,8 +80,9 @@ export function Dashboard(prop){
           
         //   setLoading(true);
           // wait for the transaction to get mined
-          // console.log('line 70',tx)
+          // console.log('getContracts',tx)
           setContracts(tx)
+          
         } catch (err) {
           console.error(err);
         }
@@ -76,16 +90,15 @@ export function Dashboard(prop){
 
       const getMyContract = async () => {
         try {          
-          
+          // console.log(contracts)
           const signer = await getProviderOrSigner(true);
           const address = await signer.getAddress();
           for(let i=0;i<contracts.length;i++){
             const AccountContract = new Contract(contracts[i], CONTRACT_ABI, signer); 
             const tx1=await AccountContract.myRole()//get my role
             if(tx1!='na'){
-              setMyRole(tx1)
               setMyContracts(contracts[i])
-              console.log('mycontract',contracts[i])                
+              // console.log('mycontract',contracts[i])                
             }
 
           }
@@ -98,13 +111,32 @@ export function Dashboard(prop){
         try{
           const signer = await getProviderOrSigner(true);
           const address = await signer.getAddress();
-          const AccountContract = new Contract(myContract, CONTRACT_ABI, signer); 
+          // console.log(Account_CONTRACT_ADDRESS)
+          const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
           const mgrs=await AccountContract.getManagers()//get all managers
-          const employees=await AccountContract.getEmployee()//get all employees
+          const employees=await AccountContract.getEmployees()//get all employees
+          const roles=await AccountContract.getRoles()//get all employees
+          
           const merchants=await AccountContract.getMerchants()//get all merchants
+          const myProfile=await AccountContract.EmployeeProfile(address)//get all merchants
+          const myRole=await AccountContract.roleNames(myProfile[2])//get all employees
+          const myBudget=await AccountContract.roleBudget(myRole)
+          const mySpent=await AccountContract.roleNames(myProfile[4])//get all employees
+          // console.log(roles)
+          // console.log(myRole)
+          console.log(myBudget.toNumber())
+          // console.log(mySpent)
+          setRoles(roles)
           setManagers(mgrs)
           setEmployees(employees)
           setMerchants(merchants)
+//Employee Dashboard data
+          setMyRole(myRole)
+          setMyBudget(myBudget.toNumber())
+          // setMySpent(mySpent.toNumber())
+
+          
+
          
         }catch(err){
             console.log(err)
@@ -130,57 +162,121 @@ export function Dashboard(prop){
     
     return(
         <div className="text-start">
-            <div class="row">
-                <div class="col-sm-3 mb-3 mb-sm-0">
-                    <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">My Contract</h5>
-                        <p class="card-text">Contract address:<b id="myConctract">{myContract}</b></p>
-                        <p class="card-text">My role:<b>{myRole}</b></p>
-                        
-                    </div>
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Managers</h5>
-                        <p class="card-text">{<ul>
-                                {managers.map((mgr)=>{
-                                return(<li>{mgr}</li>)
-                                })}
-                                </ul>}:</p>   
-                    </div>
-                    </div>
+            {prop.role=='owner'?(
+                          <div class="row">
+                          <button class="btn btn-info" type="button" onClick={()=>{
+                                    getContracts()
+                                    getMyContract()
+                                    getContractInfo()
+                                  }}><h5>Dashboard - click to refersh</h5></button>    
+                                 
+                                
+                            <div class="col-sm-2 mb-3 mb-sm-0">
+                                
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">My Contract</h5>
+                                    <p class="card-text">Contract address:<b id="myConctract">{myContract}</b></p>
+                                    <p class="card-text">My role:<b>{myRole}</b></p>
+                                    
+                                </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Managers</h5>
+                                    <p class="card-text">{<ul>
+                                            {managers.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}:</p>   
+                                </div>
+                                </div>
+                            </div>
+            
+                            <div class="col-sm-2">
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Roles</h5>
+                                    <p class="card-text">{<ul>
+                                            {roles.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</p>   
+                                </div>
+                                </div>
+                            </div>
+            
+                            
+            
+                            <div class="col-sm-2">
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Merchants</h5>
+                                    <p class="card-text">{<ul>
+                                            {merchants.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</p>   
+                                </div>
+                                </div>
+                            </div>
+            
+                            <div class="col-sm-4">
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Employees</h5>
+                                    <p class="card-text">{<ul>
+                                            {employees.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</p>   
+                                </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+            ):(
+              prop.role=='manager'?(
+                <div>
+                  Manager Dashboard
+
+
                 </div>
 
-                <div class="col-sm-3">
-                    <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Employees</h5>
-                        <p class="card-text">{<ul>
-                                {employees.map((mgr)=>{
-                                return(<li>{mgr}</li>)
-                                })}
-                                </ul>}</p>   
+              ):(
+                prop.role=='employee'?(
+                  <div  className="row">
+                    <button class="btn btn-info" type="button" onClick={()=>{
+                                    getContracts()
+                                    getMyContract()
+                                    getContractInfo()
+                                  }}><h5>Dashboard - click to refersh</h5>
+                    </button>  
+                    <div class="col-sm-4 mb-3 mb-sm-0">
+                                
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">My Profile</h5>
+                                    <p class="card-text">My Role:<b id="myRole">{myRole}</b></p>
+                                    <p class="card-text">My Budget:<b>{myBudget} ETH</b></p>
+                                    <p class="card-text">My Spent:<b>{mySpent}</b></p>
+                                    
+                                </div>
+                                </div>
                     </div>
-                    </div>
-                </div>
+                                 
+                       
+                    
+                  </div>
 
-                <div class="col-sm-3">
-                    <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Merchants</h5>
-                        <p class="card-text">{<ul>
-                                {merchants.map((mgr)=>{
-                                return(<li>{mgr}</li>)
-                                })}
-                                </ul>}</p>   
-                    </div>
-                    </div>
-                </div>
-                </div>
-            {(prop.role=='owner')?(''):('')}
+
+                ):('')
+              )
+            )}
+
+            
         </div>
     )
 }

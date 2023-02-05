@@ -10,6 +10,7 @@ import {
     Mapping_CONTRACT_ADDRESS,
     CONTRACT_ABI,
     CONTRACT_code,
+    Account_CONTRACT_ADDRESS,
   } from "./Contants/Constants";
 
 
@@ -21,7 +22,7 @@ function Owner(prop){
     const [budget,setBudget]=useState([]); 
     const [walletConnected,setWalletConnected]=useState([]); 
     // const [myContract,setMyContracts]=useState(''); 
-    
+    const ADD='0xDfBA87BcB20cF01D6DF40077f42826674a08124C'   //address of corporate account contract, in future need to update to automatic
 
 
     const connectWallet = async () => {
@@ -49,6 +50,11 @@ function Owner(prop){
       }, []);
 
     const getProviderOrSigner = async (needSigner = false) => {
+      web3ModalRef.current = new Web3Modal({
+        network: "goerli",
+        providerOptions: {},
+        disableInjectedProvider: false,
+      })
         const provider = await web3ModalRef.current.connect();
         const web3Provider = new providers.Web3Provider(provider);
     
@@ -105,7 +111,10 @@ function Owner(prop){
         try {
   
           let newrole = document.getElementById('newrole').value;
-          setBudget(document.getElementById('budget').value)
+          let ETHValue=document.getElementById('budget').value
+          let budget = ethers.utils.parseUnits(ETHValue, "ether");
+          console.log(budget)
+          setBudget(budget)
           let repeat = roles.indexOf(newrole) > -1;
           if (!repeat) {
             setRoles([...roles, newrole]);
@@ -121,18 +130,43 @@ function Owner(prop){
 
       async function deployRoles(){
         try{
-          let ADD='0x5f96b7f30f47D26971A31A8b853661132fff4e0B'
-          console.log('myContract',prop.myContract)
+          let newrole = document.getElementById('newrole').value;
+          let ETHValue=document.getElementById('budget').value
+          let budget = ethers.utils.parseUnits(ETHValue, "ether");
+          // console.log('myContract',prop.myContract)
           // console.log('contract address',myConctract)
           const signer = await getProviderOrSigner(true);
           const address = await signer.getAddress();
-          const AccountContract = new Contract(ADD, CONTRACT_ABI, signer); 
+          const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
           // const mgrs=await AccountContract.getManagers()//get all managers
-          // console.log('deploying roles...')
-          const tx=await AccountContract.addRoles(roles,budget)//set roles in batch
-          tx.wait();
-          document.getElementById('notice2').innerHTML=`<h4>Roles added</h4>`
+          console.log('deploying roles...')
+          // const tx=await AccountContract.getRoles()//set roles in batch
           
+          const tx=await AccountContract.addRole(newrole,budget)//set roles in batch
+          // tx.wait();
+          // document.getElementById('notice2').innerHTML=`<h4>Roles added</h4>`
+          const roles=await AccountContract.getRoles()//get all roles
+          
+          setRoles(roles)
+        }catch(err){
+          console.log(err)
+        }
+      }
+
+      async function addMerchant(){
+        try{
+          const merchantName=document.getElementById('merchantName').value
+          const merchantAddress=document.getElementById('merchantAddress').value
+          console.log(merchantName,merchantAddress)
+          const signer = await getProviderOrSigner(true);
+          const address = await signer.getAddress();
+          const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
+          const tx=await AccountContract.addMerchant(merchantName,merchantAddress)//add merchant
+          // tx.wait();
+          // document.getElementById('notice2').innerHTML=`<h4>Roles added</h4>`
+          
+          document.getElementById('merchantAddress').value=''
+          document.getElementById('merchantName').value=''
         }catch(err){
           console.log(err)
         }
@@ -152,6 +186,7 @@ function Owner(prop){
                             <div class="d-grid gap-2">
                                 <button class="btn btn-primary" type="button" onClick={deploytContract}>Creat Corporate Account</button>
                             </div>
+                            
 
                             <div id="notice">
                                 Manager Wallets {managers.length}:
@@ -178,19 +213,17 @@ function Owner(prop){
                 
                 ):(prop.ownerFunction==2?(
                   <div>
+                            
                             <div class="input-group mb-3">
-                                    <span class="input-group-text" id="basic-addon1">Role Name</span>
-                                    <input type="text" class="form-control" placeholder="" id="newrole" aria-label="Username" aria-describedby="basic-addon1"/>
-                                    <span class="input-group-text" id="basic-addon1">Role Budget</span>
-                                    <input type="text" class="form-control" placeholder="0" id="budget" aria-label="Username" aria-describedby="basic-addon1"/>
-                                    <button  onClick={addRole}>Add Role</button>
-                            </div>
-                            <div class="d-grid gap-2">
+                                <span class="input-group-text" id="basic-addon1">Role Name</span>
+                                <input type="text" class="form-control" placeholder="" id="newrole" aria-label="Username" aria-describedby="basic-addon1"/>
+                                <span class="input-group-text" id="basic-addon1">Role Budget</span>
+                                <input type="text" class="form-control" placeholder="0" id="budget" aria-label="Username" aria-describedby="basic-addon1"/>
                                 <button class="btn btn-primary" type="button" onClick={deployRoles}>Deploy Roles</button>
                             </div>
 
                             <div id="notice2">
-                                Manager Wallets {roles.length}:
+                                Roles{roles.length}:
                                 <ul>
                                 {roles.map((role)=>{
                                 return(<li>{role}</li>)
@@ -204,7 +237,44 @@ function Owner(prop){
 
 
 
-                ):(''))}
+                ):(prop.ownerFunction==4?(
+                  <div>
+
+                            <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Merchant Name</span>
+                                    <input type="text" class="form-control col-4" placeholder="" id="merchantName" aria-label="Username" aria-describedby="basic-addon1"/>
+                                    <span class="input-group-text" id="basic-addon1">Merchant Address</span>
+                                    <input type="text" class="form-control col-8" placeholder="0x..." id="merchantAddress" aria-label="Username" aria-describedby="basic-addon1"/>
+                                    <button  class="btn btn-primary" onClick={addMerchant}>Add Merchant</button>
+                            </div>
+
+
+                  </div>):(
+                    prop.ownerFunction==5?(
+                      <div>5
+    
+    
+    
+    
+                      </div>):(
+                        prop.ownerFunction==3?(
+                          <div>Budget Under Construction
+        
+        
+        
+        
+                          </div>):("")
+
+
+                      )
+
+
+                  )
+                
+                
+                
+                
+                ))}
         </div>
     )
 }

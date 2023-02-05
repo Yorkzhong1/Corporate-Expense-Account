@@ -28,17 +28,12 @@ contract CorporateAccount {
     mapping(address=>bool) isManager;
     
 //data structure for employees
-    
-    struct Role{
-        string roleName;
-        bool active;
-        uint budget;
-    }
-    mapping(uint=>Role) public roleProfile; //mapping from ID to Role
-    uint public roleNumbers=0;
+    string[] public roleNames;
+    mapping(string=>uint) public roleBudget;
+    mapping(string=>bool) public roleActive;
     
     
-    struct Employee {
+    struct Employee{
         uint id;//employee id; employee id can also point to a specific employee in employess array
         string name;
         uint roleId;
@@ -73,6 +68,10 @@ contract CorporateAccount {
 
     function getMerchants() external view returns(address[] memory){
         return(Merchants);
+    }
+
+    function getRoles() external view returns(string[] memory){
+        return roleNames;
     }
 
 
@@ -131,10 +130,12 @@ contract CorporateAccount {
 
 
 //functions to manage roles and budget for different roles, only Owner can do these
+    
+
     function addRole(string memory _role, uint _budget) public onlyOwner{
-        uint roleID=roleNumbers;
-        roleProfile[roleID] = Role(_role,true,_budget);
-        roleNumbers+=1;
+        roleNames.push(_role);
+        roleBudget[_role]=_budget;
+        roleActive[_role]=true;
     }
 
     function addRoles(string[] memory _roles, uint _budget) external onlyOwner{
@@ -143,16 +144,17 @@ contract CorporateAccount {
         }
     }
 
-    function changeBudget(uint _id, uint _amt) external onlyOwner{
-        roleProfile[_id].budget = _amt;
+    function changeBudget(string memory _role, uint _amt) external onlyOwner{
+        roleBudget[_role] = _amt;
     }
 
-    function deactiveRole(uint _id) onlyOwner public {
-        roleProfile[_id].active=false;
+    function deactiveRole(string memory _role) onlyOwner public {
+        roleActive[_role]=false;
     }
-    
-    function roleName(uint roleId) internal view returns(string memory){
-        return roleProfile[roleId].roleName;
+  
+
+    function roleName(uint roleId) public view returns(string memory){
+        return roleNames[roleId];
     }
 
 // functions to manage merchants
@@ -198,8 +200,10 @@ contract CorporateAccount {
 
  
     
-    function addEmployee(address _employee, string memory _name, uint _roleId) public onlyManager { //add employee in batch
-        require(roleProfile[_roleId].active,"role does not exist");
+  
+
+    function addEmployee(address _employee,string memory _name, uint _roleId) public onlyManager{
+        require(roleActive[roleNames[_roleId]],"role does not exist");
         require(!isEmployee(_employee),"employee already exist");
         uint employeeId=Employees.length;
         Employees.push(_employee);
@@ -222,7 +226,7 @@ contract CorporateAccount {
 
     function changeRole(address _employee, uint _newRole) onlyManager public {
         require(isEmployee(_employee),"employee does not exist");
-        require(_newRole<=roleNumbers,"role does not exist");
+        require(_newRole<=roleNames.length,"role does not exist");
         require(isMymanager(_employee,msg.sender),"you are not manager of the employee");
         EmployeeProfile[_employee].roleId=_newRole;
     }
@@ -253,6 +257,8 @@ contract CorporateAccount {
 
     }
 
+    
+
 
     function submitTransaction(address _merchant, uint _value) onlyEmployee public {
         require(EmployeeProfile[msg.sender].active,"not active employee");
@@ -260,7 +266,7 @@ contract CorporateAccount {
         require(isMerchant(_merchant),"Merchant does not exist");
         updateSpent(msg.sender);//refersh spent amount for the employee;
         uint myRoleId=EmployeeProfile[msg.sender].roleId;
-        uint myBudget =roleProfile[myRoleId].budget;
+        uint myBudget =roleBudget[roleNames[myRoleId]];
         uint mySpent =EmployeeProfile[msg.sender].spent;
         uint myCredit = myBudget-mySpent;
         if(_value<=myCredit){  //if it is small amount then transaction are conducted directly, or it will be added to the tx pool for approval

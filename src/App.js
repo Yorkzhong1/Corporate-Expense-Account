@@ -4,6 +4,8 @@ import Web3Modal from "web3modal";
 import { useInsertionEffect, useState, useRef,useEffect } from 'react';
 import { ethers, Wallet, Contract, providers } from 'ethers';
 import Owner from './Owner.js'
+import Manager from './Manager.js'
+import Employee from './Employee.js'
 import './App.css';
 import {Dashboard} from './Dashboard';
 
@@ -13,12 +15,14 @@ function App() {
   const [role, setRole] = useState("owner");
   const [walletConnected, setWalletConnected] = useState(false);
   const [ownerFunction, setOwnerFunction] = useState(0);
+  const [mgrFunction, setMgrFunction] = useState(0);
+  const [employeeFunction, setEmployeeFunction] = useState(0);
   const [myContract, setMyContract] = useState('');
   const web3ModalRef = useRef('false');    
 
   function selectRole(){
     setRole(document.getElementById('role').value)
-    console.log(role)
+    // console.log(role)
   }
 
   
@@ -63,11 +67,6 @@ function App() {
         }
       }, []);
 
-
-
-  
-  
-
   return (
     <div className="container overflow-hidden text-center">
       <div className="row g-2">
@@ -93,16 +92,16 @@ function App() {
               ) : (<div>
                 {role=="manager"?(
                   <div className="d-grid gap-2">
-                    <button type="button" className="btn btn-light mt-3" >Add Employee</button>
-                    <button type="button" className="btn btn-light mt-3" >Change Employee Role</button>
-                    <button type="button" className="btn btn-light mt-3" >DeActive Employee</button>
-                    <button type="button" className="btn btn-light mt-3" >Change Manager</button>
-                    <button type="button" className="btn btn-light mt-3">Approve Transactions</button>
-                    <button type="button" className="btn btn-light mt-3">DisApprove Transactions</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(1)}} >Add Employee</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(2)}}>Change Employee Role</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(3)}}>DeActive Employee</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(4)}}>Change Manager</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(5)}}>Approve Transactions</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setMgrFunction(6)}}>DisApprove Transactions</button>
                   </div>
                   ):(
                     <div className="d-grid gap-2">
-                    <button type="button" className="btn btn-light mt-3" >Submit Transaction</button>
+                    <button type="button" className="btn btn-light mt-3" onClick={()=>{setEmployeeFunction(1)}}>Submit Transaction</button>
 
                   </div>)}
               </div>)
@@ -112,11 +111,15 @@ function App() {
 
     
         <div className="col-10">
-          <div className="p-3 mt-5 bg-info" id="dashboard"><h5>Dashboard</h5>
+          <div className="p-3 mt-5 bg-info" id="dashboard">
           <Dashboard role={role} myContract={myContract} setMyContract={setMyContract}/>
           </div>
           <div className="p-3 mt-2 bg-light" id="display">
-            <Owner myContract={myContract} ownerFunction={ownerFunction} walletConnected={walletConnected} />
+            {role=='owner'?(<Owner ownerFunction={ownerFunction} walletConnected={walletConnected} />):(
+              role=='manager'?(<Manager mgrFunction={mgrFunction} walletConnected={walletConnected} />):(
+                role=='employee'?(<Employee mgrFunction={employeeFunction} walletConnected={walletConnected} />):(
+                  '')))}
+            
           </div>
         </div>
       </div>
