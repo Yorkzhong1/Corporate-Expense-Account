@@ -11,18 +11,18 @@ const hre = require("hardhat");
 async function main() {
 // constructor(address[] memory _mgrs ,address _mappingContract) 
 
-  const mgrs=['0x2e5e78063F7490952C1b093D7492B645ea1De696','0x1ad7fa3Fbc4CE0778A1F6545ccB53Ed5C8CD0244']
-  const mapping = '0xb3e5f768601F1CD9561Ec55A0ab17CB71AbDc391'
+  // const mgrs=['0x2e5e78063F7490952C1b093D7492B645ea1De696','0x1ad7fa3Fbc4CE0778A1F6545ccB53Ed5C8CD0244']
+  // const mapping = '0xb3e5f768601F1CD9561Ec55A0ab17CB71AbDc391'
 
-  const Contract = await hre.ethers.getContractFactory("CorporateAccount");
-  const contract = await Contract.deploy(mgrs,mapping);
+  // const Contract = await hre.ethers.getContractFactory("CorporateAccount");
+  // const contract = await Contract.deploy(mgrs,mapping);
+
+  // await contract.deployed();
+
+  const Mapping = await hre.ethers.getContractFactory("Mapping");
+  const contract = await Mapping.deploy();
 
   await contract.deployed();
-
-  // const Mapping = await hre.ethers.getContractFactory("Mapping");
-  // const mapping = await Mapping.deploy();
-
-  // await mapping.deployed();
 
   console.log(
     `Contract deployed to ${contract.address}`

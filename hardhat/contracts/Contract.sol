@@ -19,8 +19,7 @@ interface MappingContract {
     }
 
 contract CorporateAccount {
-
-    address owner;
+    address public owner;
     uint public required;//required number of approvals to approve
     uint deployDate;
 
@@ -51,6 +50,30 @@ contract CorporateAccount {
     }
     mapping (address=>Employee) public EmployeeProfile;//each employee have one role
     address[] public Employees;
+//function for external infomation
+   function myRole() external view returns(string memory){
+        if(owner==msg.sender){
+            return "owner";
+        } else if(isManager[msg.sender]){
+            return "manager";
+        } else if(isEmployee(msg.sender)){
+            return 'employee';
+        } else {
+            return "na";
+        }
+    }
+
+    function getManagers() external view returns(address[] memory){
+        return(managers);
+    }
+
+    function getEmployees() external view returns(address[] memory){
+        return(Employees);
+    }
+
+    function getMerchants() external view returns(address[] memory){
+        return(Merchants);
+    }
 
 
 //data structure for whitelsted merchants
@@ -156,7 +179,7 @@ contract CorporateAccount {
 
 
 //functions to manage employee
-    function isEmployee(address _employee) internal view returns(bool){
+    function isEmployee(address _employee) public view returns(bool){
         for(uint i=0;i<Employees.length;i++){
             if(Employees[i]==_employee){
                 return true;
@@ -172,6 +195,8 @@ contract CorporateAccount {
             return false;
         }
     }
+
+ 
     
     function addEmployee(address _employee, string memory _name, uint _roleId) public onlyManager { //add employee in batch
         require(roleProfile[_roleId].active,"role does not exist");
