@@ -15,5 +15,9 @@ module.exports = {
       url:process.env.URL_LOCAL,
       accounts:[process.env.PTIVATE_KEY_LOCAL],
     },
+
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_KEY
   }
 };
