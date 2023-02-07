@@ -28,24 +28,17 @@ export function Dashboard(prop){
     const [myContract,setMyContracts]=useState(""); 
 
 //manager data
-const [isManager,setIsManager]=useState('no'); 
-const [myEmployee,setMyEmployee]=useState([]); 
-const [tx,setTx]=useState([]); 
+    const [isManager,setIsManager]=useState('no'); 
+    const [myEmployee,setMyEmployee]=useState([]); 
+    const [transaction,setTransaction]=useState(''); 
 
 
 //employee related states
+    const [isEmployee,setIsEmployee]=useState('no'); 
     const [myBudget,setMyBudget]=useState(); 
     const [mySpent,setMySpent]=useState();    
     const [myRole,setMyRole]=useState('na');  
     
-
-    
-
-
-
-
-
-
 
 //basic functions
     const getProviderOrSigner = async (needSigner = false) => {
@@ -108,7 +101,7 @@ const [tx,setTx]=useState([]);
             const AccountContract = new Contract(contracts[i], CONTRACT_ABI, signer); 
             const tx1=await AccountContract.myRole()//get my role
             if(tx1!='na'){
-              setMyContracts(contracts[i])
+              setMyContracts(Account_CONTRACT_ADDRESS)
               // console.log('mycontract',contracts[i])                
             }
 
@@ -122,32 +115,61 @@ const [tx,setTx]=useState([]);
         try{
           const signer = await getProviderOrSigner(true);
           const address = await signer.getAddress();
-          // console.log(Account_CONTRACT_ADDRESS)
+          
           const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
           const mgrs=await AccountContract.getManagers()//get all managers
+          const isEmployee=await AccountContract.isEmployee(address)//get all managers
+          setIsEmployee(isEmployee)
           const employees=await AccountContract.getEmployees()//get all employees
           const roles=await AccountContract.getRoles()//get all employees
           const owner=await AccountContract.owner()//get owner
-          const tx=await AccountContract.Transactions(0)//get owner
-          setTx(tx)
+          
+          const tx=await AccountContract.getTransactions()//get transactions
+          console.log(tx)
+          let Transactions=[]
+          for(let i=0;i<tx.length;i++){
+            let tx_from=tx[i][0]
+            let tx_to=tx[i][1]
+            let tx_value=ethers.utils.formatEther(tx[i][2])
+            let tx_status=tx[i][3]==0?('submited'):(tx[i][3]==1?('approved'):(tx[i][3]==2?('disapproved'):('executed')))
+            let newTx=`From: ${tx_from},To: ${tx_to}, Value: ${tx_value},Status: ,${tx_status}`
+            Transactions.push(newTx)
+          }
+          setTransaction(Transactions)
+          
+          // console.log(tx_from,tx_to,tx_value,tx_status)
+        //   struct Transaction {
+        //     address employee;//from employee
+        //     address merchants;//to merchants
+        //     uint256 value;
+        //     Status txStatus;//active or inactive
+        // }
           
 
+          
           const merchants=await AccountContract.getMerchants()//get all merchants
+          
+          
           const myProfile=await AccountContract.EmployeeProfile(address)//my profile
-          const myRole=await AccountContract.roleNames(myProfile[2])//get all employees
+          
+          // console.log(myProfile[2].toNumber())
+          
+          const myRole=await AccountContract.roleNames(myProfile[2].toNumber())//get all employees
+          
           const myBudget=await AccountContract.roleBudget(myRole).then(ethers.utils.formatEther)
           const mySpent=ethers.utils.formatEther(myProfile[4])
+          
           
           if(address==owner){setIsOwner('yes')
           }else{setIsOwner('No')}
 
           
           for(let i=0;i<mgrs.length;i++){
-            
             if(mgrs[i]==address){setIsManager('yes')}
           }
 
           let myEmployee = []
+
           for(let i=0;i<employees.length;i++){
             
             let Profile=await AccountContract.EmployeeProfile(employees[i])//get all employee profile
@@ -163,15 +185,16 @@ const [tx,setTx]=useState([]);
             }
           }
           setMyEmployee(myEmployee)
-
           setRoles(roles)
           setManagers(mgrs)
           setEmployees(employees)
           setMerchants(merchants)
 //Employee Dashboard data
+          if(isEmployee){
           setMyRole(myRole)
           setMyBudget(myBudget)
           setMySpent(mySpent)
+          }
 
           
 
@@ -313,9 +336,7 @@ const [tx,setTx]=useState([]);
                       <div class="card-body">
                           <h5 class="card-title">Transactions</h5>
                              <p class="card-text">{<ul>
-                                            {managers.map((mgr)=>{
-                                            return(<li>{mgr}</li>)
-                                            })}
+                                            {transaction}
                                             </ul>}</p>
                                       
                       </div>
@@ -342,6 +363,8 @@ const [tx,setTx]=useState([]);
                                       <p class="card-text">My Role:<b id="myRole">{myRole}</b></p>
                                       <p class="card-text">My Budget:<b>{myBudget} ETH</b></p>
                                       <p class="card-text">My Spent:<b>{mySpent} ETH</b></p>
+                                      <p class="card-text">isEmployee:<b>{isEmployee?('Yes'):("No")}</b></p>
+
                                       
                                   </div>
                                 </div>
@@ -356,6 +379,17 @@ const [tx,setTx]=useState([]);
                                             return(<li>{mgr}</li>)
                                             })}
                                             </ul>}</b></p>
+                                      
+                                      
+                                  </div>
+                                </div>
+                    </div>
+                    <div class="col-sm-4 mb-3 mb-sm-0">
+                                
+                                <div class="card">
+                                  <div class="card-body">
+                                      <h5 class="card-title">Transaction</h5>
+                                      <p class="card-text"><b>{transaction}</b></p>
                                       
                                       
                                   </div>

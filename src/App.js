@@ -88,6 +88,7 @@ function App() {
                 <button type="button" className="btn btn-light mt-3" onClick={()=>{setOwnerFunction(3)}}>Budgets</button>
                 <button type="button" className="btn btn-light mt-3" onClick={()=>{setOwnerFunction(4)}}>Merchants</button>
                 <button type="button" className="btn btn-light mt-3" onClick={()=>{setOwnerFunction(5)}}>Change Owner</button>
+                <button type="button" className="btn btn-light mt-3" onClick={()=>{setOwnerFunction(6)}}>Withdraw Fund</button>
               </div>
               ) : (<div>
                 {role=="manager"?(

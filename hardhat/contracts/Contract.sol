@@ -74,6 +74,13 @@ contract CorporateAccount {
         return roleNames;
     }
 
+    function getTransactions() external view returns(Transaction[] memory){
+        return Transactions;
+    }
+    function withdraw() external onlyOwner{
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
 
 //data structure for whitelsted merchants
     struct Merchant{
@@ -289,14 +296,14 @@ contract CorporateAccount {
         address employee=Transactions[_id].employee;
         require(isMymanager(employee,msg.sender),"not employee's manager"); //only employee's manager can approve
         Transactions[_id].txStatus=Status.APPROVED;
-        
+        executeLargeTx(_id);
     }
 
     function disApproveLargeTx(uint _id) onlyManager public {
         address employee=Transactions[_id].employee;
         require(isMymanager(employee,msg.sender),"not employee's manager"); //only employee's manager can approve
         Transactions[_id].txStatus=Status.DISAPPROVED;
-        executeLargeTx(_id);
+        
     }
 
     function executeLargeTx(uint _id) internal{
@@ -304,7 +311,7 @@ contract CorporateAccount {
         address merchant=Transactions[_id].merchants;
         uint value=Transactions[_id].value;
         payable(merchant).transfer(value);
-        Transactions[_id].txStatus=Status.DISAPPROVED;
+        Transactions[_id].txStatus=Status.EXECUTED;
     }
 
 

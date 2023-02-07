@@ -171,6 +171,18 @@ function Owner(prop){
           console.log(err)
         }
       }
+
+      async function withDraw(){
+        try{
+          const signer = await getProviderOrSigner(true);
+          const address = await signer.getAddress();
+          const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
+          const tx=await AccountContract.withdraw()
+       
+        }catch(err){
+          console.log(err)
+        }
+      }
     
     return(
         <div>
@@ -263,16 +275,13 @@ function Owner(prop){
         
         
         
-                          </div>):("")
+                          </div>):(prop.ownerFunction==6?(
 
+                              <button  class="btn btn-primary" onClick={withDraw}>withDraw Fund</button>
 
+                          ):(''))
                       )
-
-
-                  )
-                
-                
-                
+                    )
                 
                 ))}
         </div>

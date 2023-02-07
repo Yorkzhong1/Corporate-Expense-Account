@@ -108,6 +108,24 @@ function Manager(prop){
         }
       }
 
+
+      async function approveTx(){
+        try{
+          let txId = Number(document.getElementById('txId').value);
+          const signer = await getProviderOrSigner(true);
+          const address = await signer.getAddress();
+          const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
+          // const mgrs=await AccountContract.getManagers()//get all managers
+          const tx1=await AccountContract.approveLargeTx(txId) 
+          // const tx2=await AccountContract.executeLargeTx(txId)
+          document.getElementById('txId').value=''
+
+          
+        }catch(err){
+          console.log(err)
+        }
+      }
+
   
     
     return(
@@ -132,9 +150,6 @@ function Manager(prop){
                         Connect your wallet
                         </button>
                     )}
-
-
-
                 </div>
                 
                 ):(prop.mgrFunction==2?(
@@ -152,7 +167,24 @@ function Manager(prop){
     
                       </div>):(
                         prop.mgrFunction==5?(
-                          <div>5 - Under Construction
+                          <div>
+                            <div>
+                    {prop.walletConnected ? (
+                        <div>
+                            <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Transaction</span>
+                                    <input type="text" class="form-control" placeholder="" id="txId" aria-label="Username" aria-describedby="basic-addon1"/>
+                                    
+                                    <button  onClick={approveTx}>Approve</button>
+                            </div>                  
+                        </div>
+
+                    ) : (
+                        <button onClick={connectWallet}>
+                        Connect your wallet
+                        </button>
+                    )}
+                </div>
     
                           </div>):(prop.mgrFunction==6?(
                           <div>6-Under Construction
