@@ -2,6 +2,9 @@ Corporate Expense Manager
 
 demo website: https://corporate-expense-account.vercel.app/
 
+Introduction video: https://raw.githubusercontent.com/Yorkzhong1/Corporate-Expense-Account/master/Introduction-Long.mp4
+
+
 
 This is an app that help corporate to manage their employee expenses. The backend are on blockchain so it is transparent.
 
