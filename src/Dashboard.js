@@ -17,20 +17,31 @@ import {
 
 export function Dashboard(prop){
     const web3ModalRef = useRef();  
+    const [isOwner,setIsOwner]=useState(''); 
+    
     const [managers,setManagers]=useState([]); 
     const [roles,setRoles]=useState([]); 
     const [employees,setEmployees]=useState([]); 
     const [merchants,setMerchants]=useState([]); 
     const [contracts,setContracts]=useState([]); 
+    const [walletConnected, setWalletConnected] = useState(false);
+    const [myContract,setMyContracts]=useState(""); 
+
+//manager data
+const [isManager,setIsManager]=useState('no'); 
+const [myEmployee,setMyEmployee]=useState([]); 
+const [tx,setTx]=useState([]); 
+
 
 //employee related states
     const [myBudget,setMyBudget]=useState(); 
-    const [mySpent,setMySpent]=useState(); 
+    const [mySpent,setMySpent]=useState();    
+    const [myRole,setMyRole]=useState('na');  
     
 
-    const [myContract,setMyContracts]=useState(""); 
-    const [myRole,setMyRole]=useState('na');  
-    const [walletConnected, setWalletConnected] = useState(false);
+    
+
+
 
 
 
@@ -116,24 +127,51 @@ export function Dashboard(prop){
           const mgrs=await AccountContract.getManagers()//get all managers
           const employees=await AccountContract.getEmployees()//get all employees
           const roles=await AccountContract.getRoles()//get all employees
+          const owner=await AccountContract.owner()//get owner
+          const tx=await AccountContract.Transactions(0)//get owner
+          setTx(tx)
           
+
           const merchants=await AccountContract.getMerchants()//get all merchants
-          const myProfile=await AccountContract.EmployeeProfile(address)//get all merchants
+          const myProfile=await AccountContract.EmployeeProfile(address)//my profile
           const myRole=await AccountContract.roleNames(myProfile[2])//get all employees
-          const myBudget=await AccountContract.roleBudget(myRole)
-          const mySpent=await AccountContract.roleNames(myProfile[4])//get all employees
-          // console.log(roles)
-          // console.log(myRole)
-          console.log(myBudget.toNumber())
-          // console.log(mySpent)
+          const myBudget=await AccountContract.roleBudget(myRole).then(ethers.utils.formatEther)
+          const mySpent=ethers.utils.formatEther(myProfile[4])
+          
+          if(address==owner){setIsOwner('yes')
+          }else{setIsOwner('No')}
+
+          
+          for(let i=0;i<mgrs.length;i++){
+            
+            if(mgrs[i]==address){setIsManager('yes')}
+          }
+
+          let myEmployee = []
+          for(let i=0;i<employees.length;i++){
+            
+            let Profile=await AccountContract.EmployeeProfile(employees[i])//get all employee profile
+         
+            let Role=await AccountContract.roleNames(Profile[2])//get all employees
+            let Budget=await AccountContract.roleBudget(myRole).then(ethers.utils.formatEther)
+            let Spend=ethers.utils.formatEther(Profile[5])
+           
+            
+            if(Profile[3]==address){
+              let Employee=`Name: ${Profile[1]} Role: ${Role} Active: ${Profile[4]} Budget ${Budget} Spent: ${Profile[5]}`
+              myEmployee.push(Employee)
+            }
+          }
+          setMyEmployee(myEmployee)
+
           setRoles(roles)
           setManagers(mgrs)
           setEmployees(employees)
           setMerchants(merchants)
 //Employee Dashboard data
           setMyRole(myRole)
-          setMyBudget(myBudget.toNumber())
-          // setMySpent(mySpent.toNumber())
+          setMyBudget(myBudget)
+          setMySpent(mySpent)
 
           
 
@@ -177,7 +215,8 @@ export function Dashboard(prop){
                                 <div class="card-body">
                                     <h5 class="card-title">My Contract</h5>
                                     <p class="card-text">Contract address:<b id="myConctract">{myContract}</b></p>
-                                    <p class="card-text">My role:<b>{myRole}</b></p>
+                                    
+                                    <p class="card-text">is Owner:<b>{isOwner}</b></p>
                                     
                                 </div>
                                 </div>
@@ -239,8 +278,49 @@ export function Dashboard(prop){
                         </div>
             ):(
               prop.role=='manager'?(
-                <div>
-                  Manager Dashboard
+                
+                <div className="row">
+                  <button class="btn btn-info" type="button" onClick={()=>{
+                                    getContracts()
+                                    getMyContract()
+                                    getContractInfo()
+                                  }}><h5>Dashboard - click to refersh</h5>
+                    </button>  
+                  <div class="col-sm-4">
+                  <div class="card">
+                      <div class="card-body">
+                          <h5 class="card-title">Manager Profile</h5>
+                             <p class="card-text">Is Manager: <b id="myRole">{isManager}</b></p>
+                                      
+                      </div>
+                  </div>
+                  </div>
+                  <div class="col-sm-4">
+                  <div class="card">
+                      <div class="card-body">
+                          <h5 class="card-title">My Employees</h5>
+                             <p class="card-text">{<ul>
+                                            {myEmployee.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</p>
+                                      
+                      </div>
+                  </div>
+                  </div>
+                  <div class="col-sm-4">
+                  <div class="card">
+                      <div class="card-body">
+                          <h5 class="card-title">Transactions</h5>
+                             <p class="card-text">{<ul>
+                                            {managers.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</p>
+                                      
+                      </div>
+                  </div>
+                  </div>
 
 
                 </div>
@@ -257,13 +337,28 @@ export function Dashboard(prop){
                     <div class="col-sm-4 mb-3 mb-sm-0">
                                 
                                 <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">My Profile</h5>
-                                    <p class="card-text">My Role:<b id="myRole">{myRole}</b></p>
-                                    <p class="card-text">My Budget:<b>{myBudget} ETH</b></p>
-                                    <p class="card-text">My Spent:<b>{mySpent}</b></p>
-                                    
+                                  <div class="card-body">
+                                      <h5 class="card-title">My Profile</h5>
+                                      <p class="card-text">My Role:<b id="myRole">{myRole}</b></p>
+                                      <p class="card-text">My Budget:<b>{myBudget} ETH</b></p>
+                                      <p class="card-text">My Spent:<b>{mySpent} ETH</b></p>
+                                      
+                                  </div>
                                 </div>
+                    </div>
+                    <div class="col-sm-4 mb-3 mb-sm-0">
+                                
+                                <div class="card">
+                                  <div class="card-body">
+                                      <h5 class="card-title">Merchants</h5>
+                                      <p class="card-text"><b>{<ul>
+                                            {merchants.map((mgr)=>{
+                                            return(<li>{mgr}</li>)
+                                            })}
+                                            </ul>}</b></p>
+                                      
+                                      
+                                  </div>
                                 </div>
                     </div>
                                  

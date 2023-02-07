@@ -73,32 +73,25 @@ function Manager(prop){
         return web3Provider;
       };
 
-      async function addEmployee(){
+      async function Spend(){
         try{
 
           
-          let add = document.getElementById('employeeAddress').value;
-          let name = document.getElementById('employeeName').value;
+          let add = document.getElementById('merchant').value;
+          let ETHValue = document.getElementById('spentValue').value;
+          let value = ethers.utils.parseUnits(ETHValue, "ether");
           
-          let roleId = Number(document.getElementById('employeeRoleId').value)
-          
-          // console.log('myContract',prop.myContract)
-          // console.log('contract address',myConctract)
           const signer = await getProviderOrSigner(true);
           const address = await signer.getAddress();
           const AccountContract = new Contract(Account_CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
-          // const mgrs=await AccountContract.getManagers()//get all managers
-          console.log('add Employee... to',Account_CONTRACT_ADDRESS)
-          const tx=await AccountContract.addEmployee(address,name,roleId)
+        
+          console.log('Spending',add)
+          const tx=await AccountContract.submitTransaction(add,value)
           
           
-          document.getElementById('employeeName').value=''
-          document.getElementById('employeeAddress').value=''
-          document.getElementById('employeeRoleId').value=''
+          document.getElementById('merchant').value=''
+          document.getElementById('spentValue').value=''
           
-          // console.log(tx)
-          // tx.wait();
-          // document.getElementById('notice2').innerHTML=`<h4>Roles added</h4>`
           
         }catch(err){
           console.log(err)
@@ -114,13 +107,12 @@ function Manager(prop){
                     {prop.walletConnected ? (
                         <div>
                             <div class="input-group mb-3">
-                                    <span class="input-group-text" id="basic-addon1">Name</span>
-                                    <input type="text" class="form-control" placeholder="" id="employeeName" aria-label="Username" aria-describedby="basic-addon1"/>
-                                    <span class="input-group-text" id="basic-addon1">Address</span>
-                                    <input type="text" class="form-control" placeholder="0x..." id="employeeAddress" aria-label="Username" aria-describedby="basic-addon1"/>
-                                    <span class="input-group-text" id="basic-addon1">RoleId</span>
-                                    <input type="text" class="form-control" placeholder="" id="employeeRoleId" aria-label="Username" aria-describedby="basic-addon1"/>
-                                    <button  onClick={addEmployee}>Add Employee</button>
+                                    
+                                    <span class="input-group-text" id="basic-addon1">Merchant</span>
+                                    <input type="text" class="form-control" placeholder="0x..." id="merchant" aria-label="Username" aria-describedby="basic-addon1"/>
+                                    <span class="input-group-text" id="basic-addon1">Value</span>
+                                    <input type="text" class="form-control" placeholder="" id="spentValue" aria-label="Username" aria-describedby="basic-addon1"/>
+                                    <button  onClick={Spend}>Spend</button>
                             </div>                  
                         </div>
 

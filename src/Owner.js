@@ -219,7 +219,7 @@ function Owner(prop){
                                 <input type="text" class="form-control" placeholder="" id="newrole" aria-label="Username" aria-describedby="basic-addon1"/>
                                 <span class="input-group-text" id="basic-addon1">Role Budget</span>
                                 <input type="text" class="form-control" placeholder="0" id="budget" aria-label="Username" aria-describedby="basic-addon1"/>
-                                <button class="btn btn-primary" type="button" onClick={deployRoles}>Deploy Roles</button>
+                                <button class="btn btn-primary" type="button" onClick={deployRoles}>Add Role</button>
                             </div>
 
                             <div id="notice2">
