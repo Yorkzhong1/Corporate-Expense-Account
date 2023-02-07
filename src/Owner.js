@@ -234,14 +234,7 @@ function Owner(prop){
                                 <button class="btn btn-primary" type="button" onClick={deployRoles}>Add Role</button>
                             </div>
 
-                            <div id="notice2">
-                                Roles{roles.length}:
-                                <ul>
-                                {roles.map((role)=>{
-                                return(<li>{role}</li>)
-                                })}
-                                </ul>
-                            </div>
+                            
 
 
 
