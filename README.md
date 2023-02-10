@@ -2,7 +2,9 @@ Corporate Expense Manager
 
 demo website: https://corporate-expense-account.vercel.app/
 
-Introduction video: https://raw.githubusercontent.com/Yorkzhong1/Corporate-Expense-Account/master/Introduction-Long.mp4
+Introduction video(short version): https://raw.githubusercontent.com/Yorkzhong1/Corporate-Expense-Account/master/Introduction-Short.mp4
+
+Demo video(long version): https://raw.githubusercontent.com/Yorkzhong1/Corporate-Expense-Account/master/Introduction-Long.mp4
 
 
 
